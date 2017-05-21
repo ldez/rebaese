@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
+	"github.com/ldez/rebaese/gh"
 	"github.com/ldez/rebaese/git"
 	"golang.org/x/oauth2"
 )
@@ -45,6 +46,13 @@ func main() {
 }
 
 func (r *Rebaese) rebase(ctx context.Context, client *github.Client) {
+
+	// Check status
+	helper := gh.NewHelper(ctx, client, 2)
+	err := helper.IsFullMergeable(r.Owner, r.RepositoryName, r.PRNumber)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	pr, _, err := client.PullRequests.Get(ctx, r.Owner, r.RepositoryName, r.PRNumber)
 
