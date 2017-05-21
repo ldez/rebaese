@@ -18,28 +18,35 @@ type RepositoryInformation struct {
 	BranchName string
 }
 
-type Configuration struct {
+type Rebaese struct {
 	Owner          string
 	RepositoryName string
 	GitHubToken    string
 	PRNumber       int
+	DryRun         bool
 }
 
 func main() {
 
 	// 1504
 	// same remote: 1589
-	configuration := &Configuration{
+	rebaese := &Rebaese{
 		Owner:          "containous",
 		RepositoryName: "traefik",
 		GitHubToken:    "",
 		PRNumber:       1567,
+		DryRun:         true,
 	}
 
 	ctx := context.Background()
-	client := newGitHubClient(ctx, configuration.GitHubToken)
+	client := newGitHubClient(ctx, rebaese.GitHubToken)
 
-	pr, _, err := client.PullRequests.Get(ctx, configuration.Owner, configuration.RepositoryName, configuration.PRNumber)
+	rebaese.rebase(ctx, client)
+}
+
+func (r *Rebaese) rebase(ctx context.Context, client *github.Client) {
+
+	pr, _, err := client.PullRequests.Get(ctx, r.Owner, r.RepositoryName, r.PRNumber)
 
 	if err != nil {
 		log.Panic(err)
@@ -48,7 +55,7 @@ func main() {
 	log.Println("Base branch: ", *pr.Base.Ref, "- Fork branch: ", *pr.Head.Ref)
 
 	forkInformation := &RepositoryInformation{
-		URL:        createRepositoryURL(*pr.Head.Repo.GitURL, configuration.GitHubToken),
+		URL:        createRepositoryURL(*pr.Head.Repo.GitURL, r.GitHubToken),
 		BranchName: *pr.Head.Ref,
 	}
 
@@ -57,10 +64,10 @@ func main() {
 		BranchName: *pr.Base.Ref,
 	}
 
-	pullRequestRebase(*forkInformation, *baseInformation)
+	r.pullRequestRebase(*forkInformation, *baseInformation)
 }
 
-func pullRequestRebase(forkInformation RepositoryInformation, baseInformation RepositoryInformation) {
+func (r *Rebaese) pullRequestRebase(forkInformation RepositoryInformation, baseInformation RepositoryInformation) {
 
 	dir, err := ioutil.TempDir("", "forker")
 	if err != nil {
@@ -84,12 +91,12 @@ func pullRequestRebase(forkInformation RepositoryInformation, baseInformation Re
 
 		remoteName = "origin"
 
-		output, err := prepareMainRepository(forkInformation, baseInformation)
+		output, err := r.prepareMainRepository(forkInformation, baseInformation)
 		if err != nil {
 			log.Fatal(output, err)
 		}
 	} else {
-		output, err := prepareFork(forkInformation, remoteName, baseInformation)
+		output, err := r.prepareFork(forkInformation, remoteName, baseInformation)
 		if err != nil {
 			log.Fatal(output, err)
 		}
@@ -100,12 +107,17 @@ func pullRequestRebase(forkInformation RepositoryInformation, baseInformation Re
 		log.Fatal(output, err)
 	}
 
-	output, err = git.PushForce("origin", forkInformation.BranchName)
-	if err != nil {
-		log.Fatal(output, err)
+	if r.DryRun {
+		log.Println("Fake push force.")
+	} else {
+		output, err = git.PushForce("origin", forkInformation.BranchName)
+		if err != nil {
+			log.Fatal(output, err)
+		}
 	}
 }
-func prepareMainRepository(forkInformation RepositoryInformation, baseInformation RepositoryInformation) (string, error) {
+
+func (r *Rebaese) prepareMainRepository(forkInformation RepositoryInformation, baseInformation RepositoryInformation) (string, error) {
 
 	output, err := git.Clone(baseInformation.URL)
 	if err != nil {
@@ -123,7 +135,7 @@ func prepareMainRepository(forkInformation RepositoryInformation, baseInformatio
 	return "", nil
 }
 
-func prepareFork(forkInformation RepositoryInformation, remoteName string, baseInformation RepositoryInformation) (string, error) {
+func (r *Rebaese) prepareFork(forkInformation RepositoryInformation, remoteName string, baseInformation RepositoryInformation) (string, error) {
 
 	output, err := git.CloneBranch(forkInformation.URL, forkInformation.BranchName)
 	if err != nil {
