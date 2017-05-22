@@ -9,21 +9,19 @@ import (
 	"github.com/google/go-github/github"
 )
 
-type helper struct {
-	ctx       context.Context
-	client    *github.Client
-	minReview int
+type GHub struct {
+	ctx    context.Context
+	client *github.Client
 }
 
-func NewHelper(ctx context.Context, client *github.Client, minReview int) *helper {
-	return &helper{ctx: ctx, client: client, minReview: minReview}
+func NewGHub(ctx context.Context, client *github.Client) *GHub {
+	return &GHub{ctx: ctx, client: client}
 }
 
-func (h *helper) IsFullMergeable(owner string, repositoryName string, prNumber int) error {
-	pr, _, err := h.client.PullRequests.Get(h.ctx, owner, repositoryName, prNumber)
-	if err != nil {
-		return err
-	}
+func (g *GHub) IsFullyMergeable(pr *github.PullRequest, minReview int) error {
+
+	prNumber := *pr.Number
+
 	if *pr.Merged {
 		return fmt.Errorf("The PR #%v is already merged.", prNumber)
 	}
@@ -31,21 +29,26 @@ func (h *helper) IsFullMergeable(owner string, repositoryName string, prNumber i
 		return fmt.Errorf("Conflicts must be resolve in the PR #%v", prNumber)
 	}
 
-	err = h.HasSuccessStatus(owner, repositoryName, *pr.Head.SHA)
+	err := g.HasSuccessStatus(pr)
 	if err != nil {
 		return err
 	}
 
-	err = h.HasReviewsApprove(owner, repositoryName, prNumber)
+	err = g.HasReviewsApprove(pr, minReview)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (h *helper) HasReviewsApprove(owner string, repositoryName string, prNumber int) error {
+func (g *GHub) HasReviewsApprove(pr *github.PullRequest, minReview int) error {
 
-	reviews, _, err := h.client.PullRequests.ListReviews(h.ctx, owner, repositoryName, prNumber)
+	owner := *pr.Base.Repo.Owner.Login
+	repositoryName := *pr.Base.Repo.Name
+	prNumber := *pr.Number
+
+	reviews, _, err := g.client.PullRequests.ListReviews(g.ctx, owner, repositoryName, prNumber)
 	if err != nil {
 		return err
 	}
@@ -58,7 +61,7 @@ func (h *helper) HasReviewsApprove(owner string, repositoryName string, prNumber
 		}
 	}
 
-	if len(reviewsState) < h.minReview {
+	if len(reviewsState) < minReview {
 		return fmt.Errorf("Need more review [%v/2]", len(reviewsState))
 	}
 
@@ -71,15 +74,19 @@ func (h *helper) HasReviewsApprove(owner string, repositoryName string, prNumber
 	return nil
 }
 
-func (h *helper) HasSuccessStatus(owner string, repositoryName string, prRef string) error {
+func (g *GHub) HasSuccessStatus(pr *github.PullRequest) error {
 
-	sts, _, err := h.client.Repositories.GetCombinedStatus(h.ctx, owner, repositoryName, prRef, nil)
+	owner := *pr.Base.Repo.Owner.Login
+	repositoryName := *pr.Base.Repo.Name
+	prRef := *pr.Head.SHA
+
+	sts, _, err := g.client.Repositories.GetCombinedStatus(g.ctx, owner, repositoryName, prRef, nil)
 	if err != nil {
 		return err
 	}
 
 	if *sts.State != "success" {
-		statuses, _, err := h.client.Repositories.ListStatuses(h.ctx, owner, repositoryName, prRef, nil)
+		statuses, _, err := g.client.Repositories.ListStatuses(g.ctx, owner, repositoryName, prRef, nil)
 		if err != nil {
 			return err
 		}
