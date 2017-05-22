@@ -1,5 +1,6 @@
 = Rebaese
 
+image:https://travis-ci.org/ldez/rebaese.svg?branch=master[Build Status,link=https://travis-ci.org/ldez/rebaese]
 
 [source, bash]
 ----
