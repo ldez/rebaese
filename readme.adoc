@@ -1,3 +1,30 @@
 = Rebaese
 
 
+[source, bash]
+----
+Rebaese is a tool made for rebase PR from GitHub.
+
+Usage: rebaese [--flag=flag_argument] [-f[flag_argument]] ...     set flag_argument to flag(s)
+   or: rebaese [--flag[=true|false| ]] [-f[true|false| ]] ...     set true/false to boolean flag(s)
+
+Flags:
+    --debug      Debug mode.                         (default "false")
+    --dry-run    Dry run mode.                       (default "true")
+    --min-review Minimum number of required reviews. (default "0")
+-o, --owner      Repository owner.
+    --pr         PR number.                          (default "0")
+-r, --repo-name  Repository name.
+-t, --token      GitHub Token.
+-h, --help       Print Help (this message) and exit
+----
+
+== Examples
+
+[source, bash]
+----
+./rebaese -o"containous" -r"traefik" \
+-t"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
+--pr=1635 --min-review=2 \
+--dry-run --debug
+----
