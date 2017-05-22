@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
+	"github.com/containous/flaeg"
 	"github.com/google/go-github/github"
 	"github.com/ldez/rebaese/core"
 	"github.com/ldez/rebaese/gh"
@@ -11,30 +13,41 @@ import (
 )
 
 type Rebaese struct {
-	Owner          string
-	RepositoryName string
-	GitHubToken    string
-	PRNumber       int
-	MinReview      int
-	DryRun         bool
+	Owner          string `short:"o" description:"Repository owner."`
+	RepositoryName string `long:"repo-name" short:"r" description:"Repository name."`
+	GitHubToken    string `long:"token" short:"t" description:"GitHub Token."`
+	PRNumber       int    `long:"pr" description:"PR number."`
+	MinReview      int    `long:"min-review" description:"Minimum number of required reviews."`
+	DryRun         bool   `long:"dry-run" description:"Dry run mode."`
+	Debug          bool   `description:"Debug mode."`
 }
 
 func main() {
 
-	// 1504
-	// same remote: 1589
 	rebaese := &Rebaese{
-		Owner:          "containous",
-		RepositoryName: "traefik",
-		GitHubToken:    "",
-		PRNumber:       1635,
-		DryRun:         false,
+		DryRun: true,
 	}
 
-	ctx := context.Background()
-	client := newGitHubClient(ctx, rebaese.GitHubToken)
+	rootCmd := &flaeg.Command{
+		Name:                  "rebaese",
+		Description:           "Rebaese is a tool made for rebase PR from GitHub.",
+		Config:                rebaese,
+		DefaultPointersConfig: &Rebaese{},
+		Run: func() error {
+			if rebaese.Debug {
+				log.Printf("Run Rebaese command with config : %+v\n", rebaese)
+			}
 
-	rebaese.rebase(ctx, client)
+			ctx := context.Background()
+			client := newGitHubClient(ctx, rebaese.GitHubToken)
+
+			rebaese.rebase(ctx, client)
+			return nil
+		},
+	}
+
+	flag := flaeg.New(rootCmd, os.Args[1:])
+	flag.Run()
 }
 
 func (r *Rebaese) rebase(ctx context.Context, client *github.Client) {

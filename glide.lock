@@ -1,6 +1,8 @@
-hash: f0513aad973a149f92eb3030d5d077989e0d006dbfa89215e671779d3941937e
-updated: 2017-05-21T18:47:46.226093763+02:00
+hash: 9eac9a0dc32f8f1fb22ca8053a93107561ae7f6e1765f42d258926acf8eaef16
+updated: 2017-05-23T00:48:57.679613131+02:00
 imports:
+- name: github.com/containous/flaeg
+  version: a731c034dda967333efce5f8d276aeff11f8ff87
 - name: github.com/golang/protobuf
   version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
   subpackages:
@@ -13,12 +15,16 @@ imports:
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
+- name: github.com/ogier/pflag
+  version: 45c278ab3607870051a2ea9040bb85fcb8557481
 - name: golang.org/x/net
   version: 242b6b35177ec3909636b6cf6a47e8c2c6324b5d
   subpackages:
   - context
 - name: golang.org/x/oauth2
   version: 7fdf09982454086d5570c7db3e11f360194830ca
+  subpackages:
+  - internal
 - name: google.golang.org/appengine
   version: 170382fa85b10b94728989dfcf6cc818b335c952
   subpackages:
@@ -29,4 +35,6 @@ imports:
   - internal/log
   - internal/modules
   - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
 testImports: []
