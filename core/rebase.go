@@ -139,9 +139,11 @@ func prepareFork(forkInformation *repositoryInformation, remoteName string, base
 func createRepositoryURL(cloneURL string, ssh bool, token string) string {
 	if ssh {
 		return cloneURL
-	} else if len(token) > 0 {
-		return strings.Replace(cloneURL, "git://", "https://"+token+"@", -1)
-	} else {
-		return strings.Replace(cloneURL, "git://", "https://", -1)
 	}
+
+	prefix := "https://"
+	if len(token) > 0 {
+		prefix += token + "@"
+	}
+	return strings.Replace(cloneURL, "git://", prefix, -1)
 }
