@@ -17,17 +17,17 @@ type repositoryInformation struct {
 	BranchName string
 }
 
-func Process(pr *github.PullRequest, gitHubToken string, dryRun bool) error {
+func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool) error {
 
 	log.Println("Base branch: ", *pr.Base.Ref, "- Fork branch: ", *pr.Head.Ref)
 
 	forkInformation := &repositoryInformation{
-		URL:        createRepositoryURL(*pr.Head.Repo.GitURL, gitHubToken),
+		URL:        createRepositoryURL(*pr.Head.Repo.GitURL, ssh, gitHubToken),
 		BranchName: *pr.Head.Ref,
 	}
 
 	baseInformation := &repositoryInformation{
-		URL:        createRepositoryURL(*pr.Base.Repo.GitURL, ""),
+		URL:        createRepositoryURL(*pr.Base.Repo.GitURL, ssh, ""),
 		BranchName: *pr.Base.Ref,
 	}
 
@@ -136,9 +136,12 @@ func prepareFork(forkInformation *repositoryInformation, remoteName string, base
 	return "", nil
 }
 
-func createRepositoryURL(cloneURL string, token string) string {
-	if len(token) > 0 {
+func createRepositoryURL(cloneURL string, ssh bool, token string) string {
+	if ssh {
+		return cloneURL
+	} else if len(token) > 0 {
 		return strings.Replace(cloneURL, "git://", "https://"+token+"@", -1)
+	} else {
+		return strings.Replace(cloneURL, "git://", "https://", -1)
 	}
-	return strings.Replace(cloneURL, "git://", "https://", -1)
 }

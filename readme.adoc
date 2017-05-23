@@ -16,6 +16,7 @@ Flags:
 -o, --owner      Repository owner.
     --pr         PR number.                          (default "0")
 -r, --repo-name  Repository name.
+    --ssh        Enable SSH support.                 (default "false")
 -t, --token      GitHub Token.
 -h, --help       Print Help (this message) and exit
 ----
