@@ -23,7 +23,7 @@ script: make test-unit
 deploy:
   - provider: releases
     api_key: ${GITHUB_TOKEN}
-    file: gcg
+    file: rebaese
     skip_cleanup: true
     file_glob: true
     on:
