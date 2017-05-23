@@ -138,7 +138,7 @@ func prepareFork(forkInformation *repositoryInformation, remoteName string, base
 
 func createRepositoryURL(cloneURL string, ssh bool, token string) string {
 	if ssh {
-		return cloneURL
+		return strings.Replace(cloneURL, "git://github.com/", "git@github.com:", -1)
 	}
 
 	prefix := "https://"
