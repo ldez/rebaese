@@ -16,6 +16,7 @@ type Rebaese struct {
 	Owner          string `short:"o" description:"Repository owner."`
 	RepositoryName string `long:"repo-name" short:"r" description:"Repository name."`
 	GitHubToken    string `long:"token" short:"t" description:"GitHub Token."`
+	SSH            bool   `description:"Enable SSH support."`
 	PRNumber       int    `long:"pr" description:"PR number."`
 	MinReview      int    `long:"min-review" description:"Minimum number of required reviews."`
 	DryRun         bool   `long:"dry-run" description:"Dry run mode."`
@@ -65,7 +66,7 @@ func (r *Rebaese) rebase(ctx context.Context, client *github.Client) {
 		log.Fatal(err)
 	}
 
-	err = core.Process(pr, r.GitHubToken, r.DryRun)
+	err = core.Process(pr, r.SSH, r.GitHubToken, r.DryRun)
 	if err != nil {
 		log.Fatal(err)
 	}
