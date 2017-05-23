@@ -38,6 +38,12 @@ func main() {
 			if rebaese.Debug {
 				log.Printf("Run Rebaese command with config : %+v\n", rebaese)
 			}
+			if rebaese.DryRun {
+				log.Print("IMPORTANT: you are using the dry-run mode. Use `--dry-run=false` to disable this mode.")
+			}
+			requiredStringField(rebaese.Owner, "owner")
+			requiredStringField(rebaese.RepositoryName, "repo-name")
+			requiredIntField(rebaese.PRNumber, "pr")
 
 			ctx := context.Background()
 			client := newGitHubClient(ctx, rebaese.GitHubToken)
@@ -84,4 +90,18 @@ func newGitHubClient(ctx context.Context, token string) *github.Client {
 		client = github.NewClient(tc)
 	}
 	return client
+}
+
+func requiredStringField(field string, fieldName string) error {
+	if len(field) == 0 {
+		log.Fatalf("%s is mandatory.", fieldName)
+	}
+	return nil
+}
+
+func requiredIntField(field int, fieldName string) error {
+	if field < 0 {
+		log.Fatalf("%s is mandatory.", fieldName)
+	}
+	return nil
 }
