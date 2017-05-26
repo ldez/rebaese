@@ -48,7 +48,11 @@ func main() {
 			ctx := context.Background()
 			client := newGitHubClient(ctx, rebaese.GitHubToken)
 
-			rebaese.rebase(ctx, client)
+			err := rebaese.rebase(ctx, client)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			return nil
 		},
 	}
@@ -57,11 +61,11 @@ func main() {
 	flag.Run()
 }
 
-func (r *Rebaese) rebase(ctx context.Context, client *github.Client) {
+func (r *Rebaese) rebase(ctx context.Context, client *github.Client) error {
 
 	pr, _, err := client.PullRequests.Get(ctx, r.Owner, r.RepositoryName, r.PRNumber)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Check status
@@ -69,13 +73,15 @@ func (r *Rebaese) rebase(ctx context.Context, client *github.Client) {
 
 	err = ghub.IsFullyMergeable(pr, r.MinReview)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = core.Process(pr, r.SSH, r.GitHubToken, r.DryRun)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 func newGitHubClient(ctx context.Context, token string) *github.Client {
