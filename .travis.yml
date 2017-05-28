@@ -18,13 +18,10 @@ addons:
 
 install: make dependencies
 
-script: make test-unit
-
 deploy:
   - provider: releases
     api_key: ${GITHUB_TOKEN}
     file: rebaese
     skip_cleanup: true
-    file_glob: true
     on:
       tags: true
