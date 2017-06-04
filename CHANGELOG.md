@@ -1,3 +1,9 @@
+## [v1.1.0](https://github.com/ldez/gcg/tree/v1.2.0) (2017-06-04)
+[All Commits](https://github.com/ldez/gcg/compare/v1.1.0...v1.2.0)
+
+**Enhancements:**
+* feat: new debug mode (hide git command). (by [ldez](https://github.com/ldez))
+
 ## [v1.1.0](https://github.com/ldez/gcg/tree/v1.1.0) (2017-05-26)
 [All Commits](https://github.com/ldez/gcg/compare/v1.0.0...v1.1.0)
 
