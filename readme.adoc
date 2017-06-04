@@ -25,7 +25,15 @@ Flags:
 
 [source, bash]
 ----
-./rebaese -o"containous" -r"traefik" \
+rebaese -o"containous" -r"traefik" \
+--ssh \
+--pr=1635 --min-review=2 \
+--dry-run --debug
+----
+
+[source, bash]
+----
+rebaese -o"containous" -r"traefik" \
 -t"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
 --pr=1635 --min-review=2 \
 --dry-run --debug

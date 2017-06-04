@@ -76,7 +76,7 @@ func (r *Rebaese) rebase(ctx context.Context, client *github.Client) error {
 		return err
 	}
 
-	err = core.Process(pr, r.SSH, r.GitHubToken, r.DryRun)
+	err = core.Process(pr, r.SSH, r.GitHubToken, r.DryRun, r.Debug)
 	if err != nil {
 		return err
 	}

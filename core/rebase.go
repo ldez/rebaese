@@ -9,7 +9,14 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/ldez/rebaese/git"
+	"github.com/ldez/go-git-cmd-wrapper/checkout"
+	"github.com/ldez/go-git-cmd-wrapper/clone"
+	"github.com/ldez/go-git-cmd-wrapper/config"
+	"github.com/ldez/go-git-cmd-wrapper/fetch"
+	"github.com/ldez/go-git-cmd-wrapper/git"
+	"github.com/ldez/go-git-cmd-wrapper/push"
+	"github.com/ldez/go-git-cmd-wrapper/rebase"
+	"github.com/ldez/go-git-cmd-wrapper/remote"
 )
 
 type repositoryInformation struct {
@@ -17,7 +24,7 @@ type repositoryInformation struct {
 	BranchName string
 }
 
-func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool) error {
+func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool, debug bool) error {
 
 	log.Println("Base branch: ", *pr.Base.Ref, "- Fork branch: ", *pr.Head.Ref)
 
@@ -42,12 +49,12 @@ func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool) 
 	os.Chdir(dir)
 	fmt.Println(os.Getwd())
 
-	remoteName, err := prepare(forkInformation, baseInformation)
+	remoteName, err := prepare(forkInformation, baseInformation, debug)
 	if err != nil {
 		return err
 	}
 
-	output, err := git.Rebase(remoteName, baseInformation.BranchName)
+	output, err := git.Rebase(rebase.PreserveMerges, rebase.Branch(fmt.Sprintf("%s/%s", remoteName, baseInformation.BranchName)))
 	if err != nil {
 		log.Print(err)
 		return errors.New(output)
@@ -55,8 +62,15 @@ func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool) 
 
 	if dryRun {
 		log.Println("Fake push force.")
+		output, err = git.Push(push.ForceWithLease, push.DryRun, push.Remote("origin"), push.RefSpec(forkInformation.BranchName), git.Debugger(debug))
+		if err != nil {
+			log.Print(err)
+			return errors.New(output)
+		} else {
+			log.Println(output)
+		}
 	} else {
-		output, err = git.PushForce("origin", forkInformation.BranchName)
+		output, err = git.Push(push.ForceWithLease, push.Remote("origin"), push.RefSpec(forkInformation.BranchName), git.Debugger(debug))
 		if err != nil {
 			log.Print(err)
 			return errors.New(output)
@@ -66,7 +80,7 @@ func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool) 
 	return nil
 }
 
-func prepare(forkInformation *repositoryInformation, baseInformation *repositoryInformation) (string, error) {
+func prepare(forkInformation *repositoryInformation, baseInformation *repositoryInformation, debug bool) (string, error) {
 
 	remoteName := "upstream"
 
@@ -79,13 +93,13 @@ func prepare(forkInformation *repositoryInformation, baseInformation *repository
 
 		remoteName = "origin"
 
-		output, err := prepareMainRepository(forkInformation, baseInformation)
+		output, err := prepareMainRepository(forkInformation, baseInformation, debug)
 		if err != nil {
 			log.Print(err)
 			return "", errors.New(output)
 		}
 	} else {
-		output, err := prepareFork(forkInformation, remoteName, baseInformation)
+		output, err := prepareFork(forkInformation, remoteName, baseInformation, debug)
 		if err != nil {
 			log.Print(err)
 			return "", errors.New(output)
@@ -95,17 +109,17 @@ func prepare(forkInformation *repositoryInformation, baseInformation *repository
 	return remoteName, nil
 }
 
-func prepareMainRepository(forkInformation *repositoryInformation, baseInformation *repositoryInformation) (string, error) {
+func prepareMainRepository(forkInformation *repositoryInformation, baseInformation *repositoryInformation, debug bool) (string, error) {
 
-	output, err := git.Clone(baseInformation.URL)
+	output, err := git.Clone(clone.Repository(baseInformation.URL), git.Debugger(debug))
 	if err != nil {
 		return output, err
 	}
 
-	git.Config("rebase.autoSquash", "true")
-	git.Config("push.default", "current")
+	git.Config(config.Entry("rebase.autoSquash", "true"))
+	git.Config(config.Entry("push.default", "current"))
 
-	output, err = git.Checkout(forkInformation.BranchName)
+	output, err = git.Checkout(checkout.Branch(forkInformation.BranchName), git.Debugger(debug))
 	if err != nil {
 		return output, err
 	}
@@ -113,22 +127,22 @@ func prepareMainRepository(forkInformation *repositoryInformation, baseInformati
 	return "", nil
 }
 
-func prepareFork(forkInformation *repositoryInformation, remoteName string, baseInformation *repositoryInformation) (string, error) {
+func prepareFork(forkInformation *repositoryInformation, remoteName string, baseInformation *repositoryInformation, debug bool) (string, error) {
 
-	output, err := git.CloneBranch(forkInformation.URL, forkInformation.BranchName)
+	output, err := git.Clone(clone.Repository(forkInformation.URL), clone.Branch(forkInformation.BranchName), clone.Directory("."), git.Debugger(debug))
 	if err != nil {
 		return output, err
 	}
 
-	git.Config("rebase.autoSquash", "true")
-	git.Config("push.default", "current")
+	git.Config(config.Entry("rebase.autoSquash", "true"), git.Debugger(debug))
+	git.Config(config.Entry("push.default", "current"), git.Debugger(debug))
 
-	output, err = git.AddRemote(remoteName, baseInformation.URL)
+	output, err = git.Remote(remote.Add, remote.Name(remoteName), remote.URL(baseInformation.URL), git.Debugger(debug))
 	if err != nil {
 		return output, err
 	}
 
-	output, err = git.Fetch(remoteName, baseInformation.BranchName)
+	output, err = git.Fetch(fetch.NoTags, fetch.Remote(remoteName), fetch.RefSpec(baseInformation.BranchName), git.Debugger(debug))
 	if err != nil {
 		return output, err
 	}
