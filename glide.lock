@@ -1,5 +1,5 @@
-hash: 3fa0c0953bb2e25e01bd5917fea8a5eee059aefbb797d1116b7e0351ed011d88
-updated: 2017-06-04T20:17:01.419310302+02:00
+hash: 98000e5c02213a375fd4331c24c70ac6a27a73706729c7200367ae1159153624
+updated: 2017-06-05T19:05:54.51486825+02:00
 imports:
 - name: github.com/containous/flaeg
   version: a731c034dda967333efce5f8d276aeff11f8ff87
@@ -16,7 +16,7 @@ imports:
   subpackages:
   - query
 - name: github.com/ldez/go-git-cmd-wrapper
-  version: 86cb404067cf85078e184ca87004e538aba1c085
+  version: 1db0113039c5ebe872c874ce51ad659e44781940
   subpackages:
   - checkout
   - clone
@@ -26,6 +26,7 @@ imports:
   - push
   - rebase
   - remote
+  - types
 - name: github.com/ogier/pflag
   version: 45c278ab3607870051a2ea9040bb85fcb8557481
 - name: golang.org/x/net

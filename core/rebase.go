@@ -60,22 +60,16 @@ func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool, 
 		return errors.New(output)
 	}
 
-	if dryRun {
-		log.Println("Fake push force.")
-		output, err = git.Push(push.ForceWithLease, push.DryRun, push.Remote("origin"), push.RefSpec(forkInformation.BranchName), git.Debugger(debug))
-		if err != nil {
-			log.Print(err)
-			return errors.New(output)
-		} else {
-			log.Println(output)
-		}
-	} else {
-		output, err = git.Push(push.ForceWithLease, push.Remote("origin"), push.RefSpec(forkInformation.BranchName), git.Debugger(debug))
-		if err != nil {
-			log.Print(err)
-			return errors.New(output)
-		}
+	output, err = git.Push(
+		git.Cond(dryRun, push.DryRun), push.ForceWithLease,
+		push.Remote("origin"), push.RefSpec(forkInformation.BranchName),
+		git.Debugger(debug))
+
+	if err != nil {
+		log.Print(err)
+		return errors.New(output)
 	}
+	log.Println(output)
 
 	return nil
 }
