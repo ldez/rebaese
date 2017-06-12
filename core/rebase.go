@@ -54,7 +54,7 @@ func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool, 
 		return err
 	}
 
-	output, err := git.Rebase(rebase.PreserveMerges, rebase.Branch(fmt.Sprintf("%s/%s", remoteName, baseInformation.BranchName)))
+	output, err := git.Rebase(rebase.PreserveMerges, rebase.Branch(fmt.Sprintf("%s/%s", remoteName, baseInformation.BranchName)), git.Debugger(debug))
 	if err != nil {
 		log.Print(err)
 		return errors.New(output)
