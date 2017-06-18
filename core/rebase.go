@@ -131,7 +131,7 @@ func prepareFork(forkInformation *repositoryInformation, remoteName string, base
 	git.Config(config.Entry("rebase.autoSquash", "true"), git.Debugger(debug))
 	git.Config(config.Entry("push.default", "current"), git.Debugger(debug))
 
-	output, err = git.Remote(remote.Add, remote.Name(remoteName), remote.URL(baseInformation.URL), git.Debugger(debug))
+	output, err = git.Remote(remote.Add(remoteName, baseInformation.URL), git.Debugger(debug))
 	if err != nil {
 		return output, err
 	}
