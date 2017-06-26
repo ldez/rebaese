@@ -105,7 +105,7 @@ func prepare(forkInformation *repositoryInformation, baseInformation *repository
 
 func prepareMainRepository(forkInformation *repositoryInformation, baseInformation *repositoryInformation, debug bool) (string, error) {
 
-	output, err := git.Clone(clone.Repository(baseInformation.URL), git.Debugger(debug))
+	output, err := git.Clone(clone.Repository(baseInformation.URL), clone.Directory("."), git.Debugger(debug))
 	if err != nil {
 		return output, err
 	}
