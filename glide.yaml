@@ -6,4 +6,4 @@ import:
 - package: github.com/containous/flaeg
 - package: github.com/ogier/pflag
 - package: github.com/ldez/go-git-cmd-wrapper
-  version: ^v0.8.0
+  version: ^v0.12.0
