@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/ldez/rebaese/core"
 	"github.com/ldez/rebaese/gh"
+	"github.com/ldez/rebaese/meta"
 	"golang.org/x/oauth2"
 )
 
@@ -21,6 +22,7 @@ type Rebaese struct {
 	MinReview      int    `long:"min-review" description:"Minimum number of required reviews."`
 	DryRun         bool   `long:"dry-run" description:"Dry run mode."`
 	Debug          bool   `description:"Debug mode."`
+	Version        bool   `short:"v" description:"Display the current version."`
 }
 
 func main() {
@@ -35,6 +37,12 @@ func main() {
 		Config:                rebaese,
 		DefaultPointersConfig: &Rebaese{},
 		Run: func() error {
+
+			if rebaese.Version {
+				meta.DisplayVersion()
+				return nil
+			}
+
 			if rebaese.Debug {
 				log.Printf("Run Rebaese command with config : %+v\n", rebaese)
 			}

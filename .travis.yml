@@ -21,7 +21,8 @@ install: make dependencies
 deploy:
   - provider: releases
     api_key: ${GITHUB_TOKEN}
-    file: rebaese
+    file: dist/rebaese*
     skip_cleanup: true
+    file_glob: true
     on:
       tags: true
