@@ -48,7 +48,7 @@ func (g *GHub) HasReviewsApprove(pr *github.PullRequest, minReview int) error {
 	repositoryName := *pr.Base.Repo.Name
 	prNumber := *pr.Number
 
-	reviews, _, err := g.client.PullRequests.ListReviews(g.ctx, owner, repositoryName, prNumber)
+	reviews, _, err := g.client.PullRequests.ListReviews(g.ctx, owner, repositoryName, prNumber, nil)
 	if err != nil {
 		return err
 	}
