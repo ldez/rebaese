@@ -26,15 +26,15 @@ type repositoryInformation struct {
 
 func Process(pr *github.PullRequest, ssh bool, gitHubToken string, dryRun bool, debug bool) error {
 
-	log.Println("Base branch: ", *pr.Base.Ref, "- Fork branch: ", *pr.Head.Ref)
+	log.Println("Base branch: ", pr.Base.GetRef(), "- Fork branch: ", pr.Head.GetRef())
 
 	forkInformation := &repositoryInformation{
-		URL:        createRepositoryURL(*pr.Head.Repo.GitURL, ssh, gitHubToken),
+		URL:        createRepositoryURL(pr.Head.Repo.GetGitURL(), ssh, gitHubToken),
 		BranchName: *pr.Head.Ref,
 	}
 
 	baseInformation := &repositoryInformation{
-		URL:        createRepositoryURL(*pr.Base.Repo.GitURL, ssh, ""),
+		URL:        createRepositoryURL(pr.Base.Repo.GetGitURL(), ssh, ""),
 		BranchName: *pr.Base.Ref,
 	}
 

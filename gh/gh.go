@@ -20,12 +20,12 @@ func NewGHub(ctx context.Context, client *github.Client) *GHub {
 
 func (g *GHub) IsFullyMergeable(pr *github.PullRequest, minReview int) error {
 
-	prNumber := *pr.Number
+	prNumber := pr.GetNumber()
 
-	if *pr.Merged {
+	if pr.GetMerged() {
 		return fmt.Errorf("The PR #%v is already merged.", prNumber)
 	}
-	if !*pr.Mergeable {
+	if !pr.GetMergeable() {
 		return fmt.Errorf("Conflicts must be resolve in the PR #%v", prNumber)
 	}
 
@@ -44,9 +44,9 @@ func (g *GHub) IsFullyMergeable(pr *github.PullRequest, minReview int) error {
 
 func (g *GHub) HasReviewsApprove(pr *github.PullRequest, minReview int) error {
 
-	owner := *pr.Base.Repo.Owner.Login
-	repositoryName := *pr.Base.Repo.Name
-	prNumber := *pr.Number
+	owner := pr.Base.Repo.Owner.GetLogin()
+	repositoryName := pr.Base.Repo.GetName()
+	prNumber := pr.GetNumber()
 
 	reviews, _, err := g.client.PullRequests.ListReviews(g.ctx, owner, repositoryName, prNumber, nil)
 	if err != nil {
@@ -56,8 +56,8 @@ func (g *GHub) HasReviewsApprove(pr *github.PullRequest, minReview int) error {
 	reviewsState := make(map[string]string)
 	for _, review := range reviews {
 		if *review.State != "COMMENTED" {
-			reviewsState[*review.User.Login] = *review.State
-			log.Printf("%s: %s\n", *review.User.Login, *review.State)
+			reviewsState[review.User.GetLogin()] = review.GetState()
+			log.Printf("%s: %s\n", review.User.GetLogin(), review.GetState())
 		}
 	}
 
@@ -76,8 +76,8 @@ func (g *GHub) HasReviewsApprove(pr *github.PullRequest, minReview int) error {
 
 func (g *GHub) HasSuccessStatus(pr *github.PullRequest) error {
 
-	owner := *pr.Base.Repo.Owner.Login
-	repositoryName := *pr.Base.Repo.Name
+	owner := pr.Base.Repo.Owner.GetLogin()
+	repositoryName := pr.Base.Repo.GetName()
 	prRef := *pr.Head.SHA
 
 	sts, _, err := g.client.Repositories.GetCombinedStatus(g.ctx, owner, repositoryName, prRef, nil)
@@ -92,8 +92,8 @@ func (g *GHub) HasSuccessStatus(pr *github.PullRequest) error {
 		}
 		var summary string
 		for _, stat := range statuses {
-			if *stat.State != "success" {
-				summary += *stat.Description + "\n"
+			if stat.GetState() != "success" {
+				summary += stat.GetDescription() + "\n"
 			}
 		}
 		return errors.New(summary)
