@@ -4,7 +4,7 @@ default:
 	./.script/make.sh
 
 dependencies:
-	glide install
+	dep ensure
 
 build:
 	go build
